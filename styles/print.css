@@ -1,0 +1,20 @@
+@media print {
+  .no-print { display: none !important; }
+
+  body { background: #fff; }
+
+  .topbar { position: static; box-shadow: none; }
+
+  .card, .stat-card {
+    box-shadow: none;
+    break-inside: avoid;
+  }
+
+  .layout { grid-template-columns: 1fr 1fr; }
+  .charts { grid-template-columns: 1fr 1fr; }
+  .dashboard { grid-template-columns: repeat(5, 1fr); }
+
+  .chart-box { min-height: 240px; }
+
+  .footer { display: none; }
+}
