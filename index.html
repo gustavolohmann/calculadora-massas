@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MassaLucro — Calculadora de Precificação para Massas Caseiras</title>
+  <meta name="description" content="Calculadora profissional de custos, precificação e lucro para quem vende massas caseiras." />
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles/main.css" />
+  <link rel="stylesheet" href="styles/components.css" />
+  <link rel="stylesheet" href="styles/print.css" media="print" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="container topbar__inner">
+      <div class="brand">
+        <span class="brand__icon">🍝</span>
+        <div>
+          <h1 class="brand__title">MassaLucro</h1>
+          <p class="brand__subtitle">Calculadora profissional de precificação</p>
+        </div>
+      </div>
+      <div class="toolbar no-print">
+        <button id="btn-new" class="btn btn--ghost" title="Começar uma receita do zero">＋ Nova Receita</button>
+        <button id="btn-duplicate" class="btn btn--ghost" title="Criar uma cópia desta receita">⧉ Duplicar</button>
+        <button id="btn-pdf" class="btn btn--outline">Exportar PDF</button>
+        <button id="btn-excel" class="btn btn--outline">Exportar Excel</button>
+        <button id="btn-print" class="btn btn--primary">Imprimir</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Nome da receita -->
+    <section class="card recipe-name">
+      <label class="field">
+        <span class="field__label">Nome da receita</span>
+        <input id="recipe-name" type="text" placeholder="Ex.: Lasanha à bolonhesa" maxlength="60" />
+      </label>
+      <p class="autosave-hint no-print" id="autosave-hint">Salvo automaticamente ✓</p>
+    </section>
+
+    <!-- Dashboard -->
+    <section class="dashboard" aria-label="Resumo financeiro">
+      <article class="stat-card stat-card--revenue">
+        <span class="stat-card__icon">💰</span>
+        <span class="stat-card__label">Receita esperada</span>
+        <strong class="stat-card__value" id="stat-revenue">R$ 0,00</strong>
+      </article>
+      <article class="stat-card stat-card--profit">
+        <span class="stat-card__icon">📈</span>
+        <span class="stat-card__label">Lucro</span>
+        <strong class="stat-card__value" id="stat-profit">R$ 0,00</strong>
+      </article>
+      <article class="stat-card stat-card--cost">
+        <span class="stat-card__icon">📦</span>
+        <span class="stat-card__label">Custo</span>
+        <strong class="stat-card__value" id="stat-cost">R$ 0,00</strong>
+      </article>
+      <article class="stat-card stat-card--price">
+        <span class="stat-card__icon">💵</span>
+        <span class="stat-card__label">Preço ideal</span>
+        <strong class="stat-card__value" id="stat-price">R$ 0,00</strong>
+      </article>
+      <article class="stat-card stat-card--margin">
+        <span class="stat-card__icon">📊</span>
+        <span class="stat-card__label">Margem</span>
+        <strong class="stat-card__value" id="stat-margin">0%</strong>
+      </article>
+    </section>
+
+    <div class="layout">
+      <div class="layout__col">
+        <!-- Ingredientes -->
+        <section class="card" id="section-ingredients">
+          <h2 class="card__title">🧾 Ingredientes</h2>
+          <p class="card__hint">Informe quanto você comprou, quanto pagou e quanto usou na receita. O custo proporcional é calculado automaticamente.</p>
+
+          <form id="ingredient-form" class="ingredient-form no-print" autocomplete="off">
+            <label class="field field--grow">
+              <span class="field__label">Ingrediente</span>
+              <input id="ing-name" type="text" placeholder="Ex.: Farinha de trigo" required maxlength="40" />
+            </label>
+            <div class="field-group">
+              <label class="field">
+                <span class="field__label">Qtd. comprada</span>
+                <input id="ing-purchased-qty" type="number" min="0.001" step="any" placeholder="5" required />
+              </label>
+              <label class="field">
+                <span class="field__label">Unidade</span>
+                <select id="ing-purchased-unit">
+                  <option value="kg">kg</option>
+                  <option value="g">g</option>
+                  <option value="l">litro</option>
+                  <option value="ml">ml</option>
+                  <option value="un">unidade</option>
+                </select>
+              </label>
+              <label class="field">
+                <span class="field__label">Preço pago (R$)</span>
+                <input id="ing-price" type="number" min="0.01" step="any" placeholder="30,00" required />
+              </label>
+            </div>
+            <div class="field-group">
+              <label class="field">
+                <span class="field__label">Qtd. usada</span>
+                <input id="ing-used-qty" type="number" min="0.001" step="any" placeholder="700" required />
+              </label>
+              <label class="field">
+                <span class="field__label">Unidade</span>
+                <select id="ing-used-unit">
+                  <option value="g">g</option>
+                  <option value="kg">kg</option>
+                  <option value="l">litro</option>
+                  <option value="ml">ml</option>
+                  <option value="un">unidade</option>
+                </select>
+              </label>
+              <div class="field field--btn">
+                <button type="submit" class="btn btn--primary btn--block">Adicionar</button>
+              </div>
+            </div>
+            <p class="form-error" id="ingredient-error" hidden></p>
+          </form>
+
+          <div class="table-wrap">
+            <table class="table" id="ingredient-table">
+              <thead>
+                <tr>
+                  <th>Ingrediente</th>
+                  <th>Qtd. usada</th>
+                  <th>Custo</th>
+                  <th class="no-print"></th>
+                </tr>
+              </thead>
+              <tbody id="ingredient-tbody"></tbody>
+              <tfoot>
+                <tr>
+                  <td colspan="2"><strong>Total dos ingredientes</strong></td>
+                  <td colspan="2"><strong id="ingredient-total">R$ 0,00</strong></td>
+                </tr>
+              </tfoot>
+            </table>
+            <p class="empty-state" id="ingredient-empty">Nenhum ingrediente adicionado ainda.</p>
+          </div>
+        </section>
+
+        <!-- Custos adicionais -->
+        <section class="card" id="section-extra-costs">
+          <h2 class="card__title">🧯 Custos adicionais</h2>
+          <p class="card__hint">Todos opcionais. Valores referentes à receita inteira.</p>
+          <div class="extra-costs-grid" id="extra-costs-grid"></div>
+          <p class="extra-costs-total">Total de custos adicionais: <strong id="extra-costs-total">R$ 0,00</strong></p>
+        </section>
+
+        <!-- Produção e margem -->
+        <section class="card" id="section-production">
+          <h2 class="card__title">🍽️ Produção e margem</h2>
+          <div class="production-grid">
+            <label class="field">
+              <span class="field__label">Quantas unidades essa receita produz?</span>
+              <input id="units-produced" type="number" min="1" step="1" value="20" />
+            </label>
+            <label class="field">
+              <span class="field__label">Margem desejada (%)</span>
+              <input id="desired-margin" type="number" min="0" step="1" value="50" />
+            </label>
+          </div>
+          <div class="margin-presets no-print" id="margin-presets">
+            <button class="chip" data-margin="30">30%</button>
+            <button class="chip" data-margin="40">40%</button>
+            <button class="chip" data-margin="50">50%</button>
+            <button class="chip" data-margin="80">80%</button>
+            <button class="chip" data-margin="100">100%</button>
+          </div>
+        </section>
+      </div>
+
+      <div class="layout__col">
+        <!-- Resultado -->
+        <section class="card card--highlight" id="section-results">
+          <h2 class="card__title">✅ Resultado do cálculo</h2>
+          <dl class="results">
+            <div class="results__row"><dt>Custo da receita</dt><dd id="res-recipe-cost">R$ 0,00</dd></div>
+            <div class="results__row"><dt>Custo por unidade</dt><dd id="res-unit-cost">R$ 0,00</dd></div>
+            <div class="results__row results__row--big"><dt>Preço sugerido</dt><dd id="res-suggested-price">R$ 0,00</dd></div>
+            <div class="results__row"><dt>Lucro por unidade</dt><dd id="res-unit-profit">R$ 0,00</dd></div>
+            <div class="results__row"><dt>Lucro total</dt><dd id="res-total-profit">R$ 0,00</dd></div>
+            <div class="results__row"><dt>Margem de lucro</dt><dd id="res-margin">0%</dd></div>
+            <div class="results__row"><dt>Markup</dt><dd id="res-markup">0,00×</dd></div>
+          </dl>
+        </section>
+
+        <!-- Simulador de preço -->
+        <section class="card" id="section-price-simulator">
+          <h2 class="card__title">🎚️ Simulador de preços</h2>
+          <p class="card__hint">Arraste para testar outros preços de venda. Todos os números são recalculados em tempo real.</p>
+          <div class="price-slider">
+            <input type="range" id="price-slider" min="0" max="100" step="0.05" value="0" aria-label="Preço de venda" />
+            <div class="price-slider__labels">
+              <span id="slider-min">R$ 0,00</span>
+              <strong id="slider-current" class="price-slider__current">R$ 0,00</strong>
+              <span id="slider-max">R$ 0,00</span>
+            </div>
+          </div>
+          <div class="sim-grid">
+            <div class="sim-item"><span>Preço de venda</span><strong id="sim-price">R$ 0,00</strong></div>
+            <div class="sim-item"><span>Lucro por unidade</span><strong id="sim-profit">R$ 0,00</strong></div>
+            <div class="sim-item"><span>Margem</span><strong id="sim-margin">0%</strong></div>
+            <div class="sim-item"><span>Markup</span><strong id="sim-markup">0,00×</strong></div>
+          </div>
+          <button class="btn btn--ghost btn--sm no-print" id="btn-reset-price">↺ Voltar ao preço sugerido</button>
+        </section>
+
+        <!-- Simulador de quantidade -->
+        <section class="card" id="section-qty-simulator">
+          <h2 class="card__title">📦 Simulador de quantidade</h2>
+          <p class="card__hint">Se eu vender…</p>
+          <div class="qty-chips no-print" id="qty-chips">
+            <button class="chip" data-qty="10">10</button>
+            <button class="chip" data-qty="20">20</button>
+            <button class="chip" data-qty="50">50</button>
+            <button class="chip" data-qty="100">100</button>
+            <button class="chip" data-qty="200">200</button>
+            <button class="chip" data-qty="500">500</button>
+          </div>
+          <label class="field field--inline no-print">
+            <span class="field__label">Outra quantidade</span>
+            <input id="qty-custom" type="number" min="1" step="1" placeholder="Ex.: 75" />
+          </label>
+          <div class="sim-grid sim-grid--3">
+            <div class="sim-item"><span>Faturamento</span><strong id="qty-revenue">R$ 0,00</strong></div>
+            <div class="sim-item"><span>Custo</span><strong id="qty-cost">R$ 0,00</strong></div>
+            <div class="sim-item sim-item--profit"><span>Lucro</span><strong id="qty-profit">R$ 0,00</strong></div>
+          </div>
+          <p class="sim-caption">Simulando a venda de <strong id="qty-label">20</strong> unidades.</p>
+        </section>
+      </div>
+    </div>
+
+    <!-- Gráficos -->
+    <section class="charts">
+      <div class="card chart-card">
+        <h2 class="card__title">🥧 Composição dos custos</h2>
+        <div class="chart-box"><canvas id="chart-pie"></canvas></div>
+      </div>
+      <div class="card chart-card">
+        <h2 class="card__title">📊 Custo × Receita × Lucro</h2>
+        <div class="chart-box"><canvas id="chart-bar"></canvas></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p>MassaLucro — precifique suas massas caseiras com confiança. Os dados ficam salvos somente no seu navegador.</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.4/dist/jspdf.plugin.autotable.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
